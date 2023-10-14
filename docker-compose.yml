@@ -1,0 +1,106 @@
+version: "3.9"
+
+services:
+  tech_db:
+    container_name: tech_db
+    image: postgres:15.1
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: tech_user
+      POSTGRES_PASSWORD: tech_password
+      POSTGRES_DB: tech_db
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./scripts/dump.sql:/docker-entrypoint-initdb.d/init_db.sql
+  server:
+    build: .
+    container_name: server
+    depends_on:
+      - tech_db
+    profiles:
+      - app
+    restart: unless-stopped
+    volumes:
+      - ./server:/home/app/server:ro
+    # Override the command to watch for file changes in development.
+    command: ["./.local/bin/uvicorn", "server.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    ports:
+      - "8000"
+    environment:
+      DB_HOST: tech_db
+      DB_PORT: 5432
+      DB_USERNAME: tech_user
+      DB_PASSWORD: tech_password
+      DB_DATABASE: tech_db
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.server-strip-prefix.stripprefix.prefixes=/api"
+      - "traefik.http.middlewares.server-strip-prefix.stripprefix.forceSlash=false"
+      # HTTP
+      - "traefik.http.routers.server.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.server.entrypoints=web"
+      - "traefik.http.routers.server.middlewares=server-strip-prefix@docker"
+      # HTTPS
+      - "traefik.http.routers.server-secure.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.server-secure.entrypoints=web-secure"
+      - "traefik.http.routers.server-secure.tls=true"
+      - "traefik.http.routers.server-secure.middlewares=server-strip-prefix@docker"
+  client:
+    container_name: client
+    build: ./client
+    depends_on:
+      - server
+    profiles:
+      - app
+    expose:
+      - "3000"
+    labels:
+      - "traefik.enable=true"
+      # HTTP
+      - "traefik.http.routers.client.rule=PathPrefix(`/client`)"
+      - "traefik.http.routers.client.entrypoints=web"
+      # HTTPS
+      - "traefik.http.routers.client-secure.rule=PathPrefix(`/client`)"
+      - "traefik.http.routers.client-secure.entrypoints=web-secure"
+      - "traefik.http.routers.client-secure.tls=true"
+    volumes:
+      - ./client/dist/assets:/opt/app/assets:ro
+      # Add a bind mount with the source code.
+      - ./client/src:/opt/app/src:ro
+      # Add a bind mount with the public directory.
+      - ./client/public:/opt/app/public:ro
+      # Add a bind mount with index.html.
+      - ./client/index.html:/opt/app/index.html:ro
+      # Add a bind mount with the vite config.
+      - ./client/vite.config.js:/opt/app/vite.config.js:ro
+
+  reverse-proxy:
+    container_name: reverse-proxy
+    image: traefik:2.9
+    profiles:
+      - app
+    command:
+      - "--log.level=DEBUG"
+      - "--api.dashboard=true"
+      - "--entrypoints.web.address=:8000"
+      - "--entrypoints.web-secure.address=:8443"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--api.insecure=true"
+      - "--providers.file.directory=/configuration"
+      - "--providers.file.watch=true"
+    ports:
+      - "8080:8080"
+      - "8000:8000"
+      - "8443:8443"
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./development-certs/localhost.crt:/etc/certs/localhost.crt:ro
+      - ./development-certs/localhost.key:/etc/certs/localhost.key:ro
+      - ./traefik/development-dynamic-config.yml:/configuration/dynamic.yml:ro
+
+volumes:
+  postgres-data:
+    external: true
