@@ -1,5 +1,6 @@
 
 <template>
+    <NavMenu/>
     <div v-for="(order, i) in orders">
         <div class="card xl:flex xl:justify-content-center">
             <OrderList v-model="orders[i].plates" listStyle="height:auto" dataKey="i">
@@ -27,6 +28,7 @@
 
 <script setup>
 import OrderList from 'primevue/orderlist';
+import NavMenu from './NavMenu.vue';
 import { ref, onMounted, computed } from 'vue';
 
 const orders = ref(null);

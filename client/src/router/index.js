@@ -2,6 +2,8 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 
 import Menu from '@/components/Menu.vue'
 import Orders from '@/components/Orders.vue'
+import Login from '@/components/users/Login.vue'
+import Registration from '@/components/users/Registration.vue'
 
 // 2. Define some routes
 // Each route should map to a component.
@@ -9,6 +11,8 @@ import Orders from '@/components/Orders.vue'
 const routes = [
   { path: '/', component: Menu },
   { path: '/orders', component: Orders },
+  { path: '/login', component: Login },
+  { path: '/registration', component: Registration },
 ]
 
 // 3. Create the router instance and pass the `routes` option

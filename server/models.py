@@ -20,6 +20,14 @@ def random_delay():
     return datetime.now() + timedelta(seconds=delta)
 
 
+class User(Base):
+    __tablename__ = 'user'
+
+    user_id = Column(Integer, primary_key=True)
+    username = Column(Text, nullable=False)
+    hashed_password = Column(Text, nullable=False)
+    
+
 class PlateOrder(Base):
     __tablename__ = 'plate_order'
 
@@ -51,4 +59,5 @@ class Order(Base):
     __finish_time = Column(DateTime(timezone=True), default=random_delay, nullable=False)
 
     plates = relationship("PlateOrder", back_populates="order")
+
 

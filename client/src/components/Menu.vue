@@ -1,5 +1,6 @@
 
 <template>
+    <NavMenu/>
     <div class="card">
         <DataView :value="plates" :layout="layout">
             <template #header>
@@ -49,6 +50,8 @@ import Button from 'primevue/button';
 
 import DataView from 'primevue/dataview';
 import DataViewLayoutOptions from 'primevue/dataviewlayoutoptions'   // optional
+
+import NavMenu from './NavMenu.vue';
 
 const plates = ref();
 const layout = ref('grid');

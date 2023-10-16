@@ -5,6 +5,23 @@ from pydantic.utils import GetterDict
 from pydantic import BaseModel
 
 
+class UserBase(BaseModel):
+    username: str
+    class Config:
+        orm_mode = True
+
+class UserCredentials(UserBase):
+    password: str
+
+class User(UserBase):
+    user_id: int
+    hashed_password: str
+
+class Token(BaseModel):
+    token: str
+    class Config:
+        orm_mode = True
+
 class PlateBase(BaseModel):
     plate_name: str
     price: float
