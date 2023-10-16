@@ -19,15 +19,15 @@ def generate_token(user: User):
 async def get_current_user(token: str = Depends(auth)):
     parts = token.split(":")
     if len(parts) != 2:
-        raise HTTPException(status_code=409, detail="Wrong credentials.")
+        raise HTTPException(status_code=401, detail="Wrong credentials.")
     
     user_id, signature = parts
     user = get_user_by_id(user_id)
 
     if not user:
-        raise HTTPException(status_code=409, detail="Wrong credentials.")
+        raise HTTPException(status_code=401, detail="Wrong credentials.")
     
     if generate_token(user).token != token:
-        raise HTTPException(status_code=409, detail="Wrong credentials.")
+        raise HTTPException(status_code=401, detail="Wrong credentials.")
     
     return user
