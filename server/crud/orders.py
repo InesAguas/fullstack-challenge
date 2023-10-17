@@ -1,15 +1,15 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
-from server.schemas import OrderBase
+from server.schemas import OrderBase, User
 
 import server.models as md
 
 
-def get_orders(db_session: Session):
-    return db_session.query(md.Order).all()
+def get_orders(db_session: Session, user: User):
+    return user.orders
 
 
-def add_order(db_session: Session, item: OrderBase):
+def add_order(db_session: Session, item: OrderBase, user: User):
     # Check if all plates exist.
     plate_ids = [plate.plate_id for plate in item.plates]
     plate_ids_result = db_session.query(md.Plate.plate_id).filter(
@@ -29,7 +29,7 @@ def add_order(db_session: Session, item: OrderBase):
                 detail="Non-positive plate quantity."
             )
 
-    order = md.Order()
+    order = md.Order(user_id = user.user_id)
     # Add PlateOrder objects.
     for plate in item.plates:
         plate_order = md.PlateOrder(

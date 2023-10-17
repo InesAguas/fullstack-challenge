@@ -26,6 +26,9 @@ class User(Base):
     user_id = Column(Integer, primary_key=True)
     username = Column(Text, nullable=False)
     hashed_password = Column(Text, nullable=False)
+
+    orders = relationship("Order", back_populates="user")
+    reviews = relationship("Review", back_populates="user")
     
 
 class PlateOrder(Base):
@@ -48,6 +51,7 @@ class Plate(Base):
     picture = Column(Text)
 
     orders = relationship("PlateOrder", back_populates="plate")
+    reviews = relationship("Review", back_populates="plate")
 
 
 class Order(Base):
@@ -55,9 +59,25 @@ class Order(Base):
 
     order_id = Column(Integer, primary_key=True)
     order_time = Column(DateTime(timezone=True), default=datetime.now, nullable=False)
+    user_id = Column(ForeignKey('user.user_id'), nullable=False)
 
     __finish_time = Column(DateTime(timezone=True), default=random_delay, nullable=False)
 
     plates = relationship("PlateOrder", back_populates="order")
+    user = relationship("User", back_populates="orders")
+
+
+class Review(Base):
+    __tablename__ = "review"
+
+    review_id = Column(Integer, primary_key=True)
+    user_id = Column(ForeignKey('user.user_id'), nullable=False)
+    plate_id = Column(ForeignKey('plate.plate_id'), nullable=False)
+    comment = Column(Text, nullable=False)
+    rating = Column(Integer, nullable=False)
+
+    plate = relationship("Plate", back_populates="reviews")
+    user = relationship("User", back_populates="reviews")
+    
 
 

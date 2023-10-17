@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from server.crud.users import add_user, get_user_login
+from server.crud.users import add_user, get_user_by_credentials
 from server.schemas import User, UserCredentials, UserBase, Token
 from server.utils import get_db, is_token_valid
 from sqlalchemy.orm import Session
@@ -22,5 +22,5 @@ async def login(item: UserCredentials, db_session=Depends(get_db)):
     """User login.
 
     """
-    user = get_user_login(db_session, item)
+    user = get_user_by_credentials(db_session, item)
     return generate_token(user)

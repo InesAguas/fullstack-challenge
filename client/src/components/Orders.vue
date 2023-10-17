@@ -1,9 +1,9 @@
 
 <template>
     <NavMenu/>
-    <div v-for="(order, i) in orders">
+    <div v-for="(order, i) in orders" :key="i">
         <div class="card xl:flex xl:justify-content-center">
-            <OrderList v-model="orders[i].plates" listStyle="height:auto" dataKey="i">
+            <OrderList v-model="orders[i].plates" listStyle="height:auto" dataKey="plate_id">
                 <template #header>
                     <div class="flex gap-5">
                         <span># {{ orders[i].order_id }}</span>
@@ -37,13 +37,21 @@ const plates = ref();
 onMounted(async () => {
     // fetch plates from server
     const URL = "https://localhost:8443/api/plates"
-    const response = await fetch(URL);
+    const response = await fetch(URL, {
+        headers: {
+            "Authorization": "Bearer " + sessionStorage.getItem("token")
+        }
+    });
     const data = await response.json();
     plates.value = data;
 
     // fetch orders from server
     const URL_ORDERS = "https://localhost:8443/api/orders"
-    const response_orders = await fetch(URL_ORDERS);
+    const response_orders = await fetch(URL_ORDERS, {
+        headers: {
+            "Authorization": "Bearer " + sessionStorage.getItem("token")
+        }
+    });
     const data_orders = await response_orders.json();
     orders.value = data_orders;
 });

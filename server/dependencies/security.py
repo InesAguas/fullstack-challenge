@@ -5,6 +5,7 @@ from fastapi.security import HTTPBearer
 
 from server.schemas import User, UserCredentials, UserBase, Token
 from server.crud.users import get_user_by_id
+from server.utils import get_db
 
 import hashlib
 
@@ -16,13 +17,16 @@ def generate_token(user: User):
    return Token(token=f"{user.user_id}:{signature}")
 
 
-async def get_current_user(token: str = Depends(auth)):
+async def get_current_user(db_session=Depends(get_db), token: str = Depends(auth)):
+    token = token.credentials
+    if not token:
+        raise HTTPException(status_code=401, detail="Wrong credentials.")
     parts = token.split(":")
     if len(parts) != 2:
         raise HTTPException(status_code=401, detail="Wrong credentials.")
     
     user_id, signature = parts
-    user = get_user_by_id(user_id)
+    user = get_user_by_id(db_session,user_id)
 
     if not user:
         raise HTTPException(status_code=401, detail="Wrong credentials.")

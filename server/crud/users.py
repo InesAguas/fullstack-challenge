@@ -27,7 +27,7 @@ def add_user(db_session: Session, item: UserCredentials):
     return item
 
 
-def get_user_login(db_session: Session, item: UserCredentials):
+def get_user_by_credentials(db_session: Session, item: UserCredentials):
     to_fetch = db_session.query(md.User).filter(md.User.username == item.username)
 
     if not to_fetch.first():
@@ -42,7 +42,7 @@ def get_user_login(db_session: Session, item: UserCredentials):
 
 
 def get_user_by_id(db_session: Session, user_id: int):
-    to_fetch = Session.query(md.User).filter(md.User.user_id == user_id)
+    to_fetch = db_session.query(md.User).filter(md.User.user_id == user_id)
 
     if not to_fetch.first():
         raise HTTPException(status_code=404, detail="User not found.")

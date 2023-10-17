@@ -44,7 +44,7 @@ async function login() {
     });
     
     if(response.status === 200) {
-        const data = response.json();
+        const data = await response.json();
         sessionStorage.setItem("token", data.token);
         router.push("/");
         

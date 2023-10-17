@@ -10,6 +10,7 @@ import { ref } from 'vue';
 
 const items = ref([
   {label: 'Menu', to: '/'},
+  {label: 'Cart', to: '/cart'},
   {label: 'Orders', to: '/orders'},
 ]);
 

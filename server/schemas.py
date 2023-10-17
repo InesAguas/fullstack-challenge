@@ -73,3 +73,12 @@ class Order(OrderBase):
 
     class Config:
         orm_mode = True
+
+
+class ReviewBase(BaseModel):
+    plate_id: int
+    comment: str
+    rating: int
+
+class Review(ReviewBase):
+    user_id: int

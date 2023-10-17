@@ -19,7 +19,7 @@
                             </div>
                             <div class="flex sm:flex-column align-items-center sm:align-items-end gap-3 sm:gap-2">
                                 <span class="text-2xl font-semibold">{{ slotProps.data.price }} € </span>
-                                <Button icon="pi pi-shopping-cart" rounded></Button>
+                                <Button icon="pi pi-shopping-cart" rounded @click="addToCart(slotProps.data)"></Button>
                             </div>
                         </div>
                     </div>
@@ -35,7 +35,7 @@
                         </div>
                         <div class="flex align-items-center justify-content-between">
                             <span class="text-2xl font-semibold">{{ slotProps.data.price }} €</span>
-                            <Button icon="pi pi-shopping-cart" rounded></Button>
+                            <Button icon="pi pi-shopping-cart" rounded @click="addToCart(slotProps.data)"></Button>
                         </div>
                     </div>
                 </div>
@@ -63,5 +63,18 @@ onMounted(async () => {
     const data = await response.json();
     plates.value = data;
 });
+
+function addToCart(item) {
+    const cart = JSON.parse(sessionStorage.getItem("cart")) || [];
+    const index = cart.findIndex(cartItem => cartItem.plate_id === item.plate_id);
+    if(index === -1) {
+        item.quantity = 1;
+        cart.push(item);
+    } else {
+        cart[index].quantity++;
+    }
+    sessionStorage.setItem("cart", JSON.stringify(cart));
+    console.log(cart)
+}
 
 </script>
