@@ -79,6 +79,8 @@ class ReviewBase(BaseModel):
     plate_id: int
     comment: str
     rating: int
+    class Config:
+        orm_mode = True
 
 class Review(ReviewBase):
     user_id: int

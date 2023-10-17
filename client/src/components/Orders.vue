@@ -19,20 +19,46 @@
                             <span class="font-bold w-10rem">{{ slotProps.item.quantity }} x {{ slotProps.item.plate_name }}</span>
                         </div>
                         <span class="font-bold text-900">{{ platePrice(slotProps.item.plate_id) * slotProps.item.quantity }} €</span>
+                        <Button label="Review Item" :disabled="plateReview(slotProps.item.plate_id)" @click="selectedPlate = slotProps.item, visible = true"/>
+
                     </div>
                 </template>
             </OrderList>
         </div>
+        <div>
+            <Button label="Order Again" />
+        </div>
+        <Dialog v-if="selectedPlate" v-model:visible="visible" modal :header="selectedPlate.plate_name" :style="{ width: '50vw' }">
+            <div class="card">
+                <Rating v-model="rating" :cancel="false" :stars="5" />
+                <Textarea v-model="comment" rows="5" cols="30" />
+            </div>
+            <template #footer>
+                <Button label="Submit" icon="pi pi-check" @click="submitReview()"/>
+            </template>
+        </Dialog>
     </div>
 </template>
 
 <script setup>
+import { ref, onMounted, computed } from 'vue';
+
 import OrderList from 'primevue/orderlist';
 import NavMenu from './NavMenu.vue';
-import { ref, onMounted, computed } from 'vue';
+import Button from 'primevue/button';
+import Dialog from 'primevue/dialog';
+import Rating from 'primevue/rating';
+import Textarea from 'primevue/textarea';
+
 
 const orders = ref(null);
 const plates = ref();
+const reviews = ref([]);
+const visible = ref(false);
+const selectedPlate = ref(null);
+
+const rating = ref(0);
+const comment = ref('');
 
 onMounted(async () => {
     // fetch plates from server
@@ -54,6 +80,18 @@ onMounted(async () => {
     });
     const data_orders = await response_orders.json();
     orders.value = data_orders;
+
+    //fetch user reviews
+    const URL_REVIEWS = "https://localhost:8443/api/reviews"
+    const response_reviews = await fetch(URL_REVIEWS, {
+        headers: {
+            "Authorization": "Bearer " + sessionStorage.getItem("token")
+        }
+    });
+
+    reviews.value = await response_reviews.json();
+    console.log(reviews)
+    
 });
 
 
@@ -79,6 +117,46 @@ function getOrderTotal(orderId) {
         total += platePrice(plate.plate_id) * plate.quantity;
     });
     return total.toFixed(2);
+}
+
+function plateReview(itemId) {
+    return reviews.value.find(review => review.plate_id === itemId);
+}
+
+async function submitReview() {
+    if(rating.value === 0) {
+        alert("Please select a rating");
+        return;
+    }
+
+    console.log(selectedPlate.value.plate_id)
+    console.log(rating.value)
+    console.log(comment.value)
+
+    const URL = "https://localhost:8443/api/reviews"
+    const response = await fetch(URL,{
+        method: "POST",
+        body: JSON.stringify({
+            plate_id: selectedPlate.value.plate_id,
+            rating: rating.value,
+            comment: comment.value
+        }),
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + sessionStorage.getItem("token")
+        }
+    });
+
+
+    if(response.status === 200) {
+        alert("Review submitted successfully");
+        reviews.value.push( await response.json());
+        rating.value = 0;
+        comment.value = '';
+        visible.value = false;
+    } else {
+        alert("Review failed");
+    }
 }
 
 </script>

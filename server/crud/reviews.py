@@ -20,8 +20,8 @@ def add_review(db_session: Session, item: ReviewBase, user: User):
         raise HTTPException(status_code=404, detail="Plate not found.")
     
     #Check if user has ordered the plate
-    plate_order = db_session.query(md.PlateOrder).filter(md.PlateOrder.plate_id == item.plate_id).first()
-    if not plate_order.order.user_id == user.user_id:
+    plate_order = db_session.query(md.PlateOrder).join(md.Order).filter(md.PlateOrder.plate_id == item.plate_id, md.Order.user_id == user.user_id).first()
+    if not plate_order:
         raise HTTPException(status_code=403, detail="User has not ordered this plate.")
     
     #Check if user has already reviewed the plate

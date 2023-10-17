@@ -1,6 +1,7 @@
 
 <template>
     <NavMenu/>
+    <div class="card">
     <DataTable :value="cart" tableStyle="min-width: 50rem">
         <Column field="plate_name" header="Name"></Column>
         <Column header="Picture">
@@ -20,6 +21,7 @@
             <Button label="Checkout" class="p-button-success" @click="checkoutOrder()" />
         </template>
     </DataTable>
+</div>
 </template>
 
 <script setup>
