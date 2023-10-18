@@ -2,6 +2,7 @@
     <NavMenu/>
     <div class="card">
         <div class="flex flex-column w-12 h-30rem">
+            <Button icon="pi pi-sync" @click="openSocket()" :disabled="!closed" class="align-self-end mb-2 -mt-2"/>
             <div class="flex flex-column bg-white h-full mb-3 overflow-y-scroll border-round-md">
                 <!---MESSAGE CONTAINER-->
                 <div v-for="(msg, i) in messages" :key="i" >
@@ -19,10 +20,11 @@
                 </div>
             </div>
             <div class="flex">
-                <InputText type="text" v-model="message" class="w-full mr-3" />
-                <Button icon="pi pi-send" @click="sendMessage()"/>
+                <InputText type="text" v-model="message" class="w-full mr-3" :disabled="closed"/>
+                <Button icon="pi pi-send" @click="sendMessage()" :disabled="closed"/>
             </div>
         </div>
+        
     </div>
 </template>
 
@@ -36,25 +38,33 @@ import Button from 'primevue/button';
 const messages = ref([]);
 const message = ref('');
 
-const socket = new WebSocket("ws://localhost:8000/api/ws");
+const closed = ref(false);
 
-socket.onmessage = function(event) {
-    messages.value.push({ content: event.data, type: 'received' });
-    console.log(messages.value)
-};
+let socket = null;
 
-onMounted(async () => {
-    
+onMounted(() => {
+    openSocket();
 });
+
+function openSocket() {
+    socket = new WebSocket("ws://localhost:8000/api/ws");
+    closed.value = false;
+    socket.onmessage = function(event) {
+        messages.value.push({ content: event.data, type: 'received' });
+    };
+
+    socket.onclose = function(event) {
+        closed.value = true;
+    };
+}
 
 function sendMessage() {
     if(message.value === ''){
         return;
     } 
-    messages.value.push({ content: message.value, type: 'sent' });
     socket.send(message.value);
+    messages.value.push({ content: message.value, type: 'sent' });
     message.value = '';
-    console.log(messages.value)
 }
 
 </script>
