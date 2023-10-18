@@ -82,5 +82,15 @@ class ReviewBase(BaseModel):
     class Config:
         orm_mode = True
 
+class ReviewGetter(GetterDict):
+    def get(self, key: str, default: Any = None) -> Any:
+        if key in {'username'}:
+            return getattr(self._obj.user, key)
+        else:
+            return super(ReviewGetter, self).get(key, default)
+
 class Review(ReviewBase):
-    user_id: int
+    username: str
+    class Config:
+        orm_mode = True
+        getter_dict = ReviewGetter

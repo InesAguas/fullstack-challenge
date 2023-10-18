@@ -89,8 +89,8 @@ onMounted(async () => {
         }
     });
 
-    reviews.value = await response_reviews.json();
-    console.log(reviews)
+    const data_reviews = await response_reviews.json();
+    reviews.value = data_reviews;
     
 });
 

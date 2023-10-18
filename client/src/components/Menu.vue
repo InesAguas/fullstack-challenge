@@ -37,7 +37,7 @@
                         <div class="flex align-items-center justify-content-between">
                             <span class="text-2xl font-semibold">{{ slotProps.data.price }} €</span>
                             <div>
-                            <Button label="Reviews" link />
+                            <Button label="Reviews" link @click="selectedPlate = slotProps.data, getItemReviews(), visible = true" />
                             <Button icon="pi pi-shopping-cart" rounded @click="addToCart(slotProps.data)"></Button>
                         </div>
                         </div>
@@ -46,6 +46,20 @@
             </template>
         </DataView>
     </div>
+    <Dialog v-if="selectedPlate" v-model:visible="visible" modal header="Reviews" :style="{ width: '50vw' }">
+         <Rating v-model="rating" :cancel="false" :stars="5" readonly/>
+        <DataView :value="selectedPlateReviews">
+            <template #list="slotProps">
+                <div class="col-12">
+                    <div>
+                        {{ slotProps.data.username }}
+                        <Rating v-model="slotProps.data.rating" :cancel="false" readonly />
+                        {{ slotProps.data.comment }}
+                    </div>
+                </div>
+            </template>
+        </DataView>
+    </Dialog>
 </template>
 
 <script setup>
@@ -56,9 +70,15 @@ import DataView from 'primevue/dataview';
 import DataViewLayoutOptions from 'primevue/dataviewlayoutoptions'   // optional
 
 import NavMenu from './NavMenu.vue';
+import Dialog from 'primevue/dialog';
+import Rating from 'primevue/rating';
 
 const plates = ref();
 const layout = ref('grid');
+const selectedPlate = ref();
+const visible = ref(false);
+const selectedPlateReviews = ref();
+const rating = ref(0);
 
 onMounted(async () => {
     // fetch data from server
@@ -79,6 +99,24 @@ function addToCart(item) {
     }
     sessionStorage.setItem("cart", JSON.stringify(cart));
     console.log(cart)
+}
+
+function calculateAverageRating() {
+    let sum = 0;
+    selectedPlateReviews.value.forEach(review => {
+        sum += review.rating;
+    });
+    console.log(sum)
+    return sum / selectedPlateReviews.value.length;
+}
+
+async function getItemReviews() {
+    const URL = "https://localhost:8443/api/reviews/plate/" + selectedPlate.value.plate_id;
+    const response = await fetch(URL);
+    const data = await response.json();
+    selectedPlateReviews.value = data;
+    
+    rating.value = calculateAverageRating();
 }
 
 </script>
