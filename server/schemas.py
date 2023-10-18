@@ -70,7 +70,6 @@ class Order(OrderBase):
     order_id: int
     order_time: datetime
     plates: List[PlateOrder]
-
     class Config:
         orm_mode = True
 

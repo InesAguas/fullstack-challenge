@@ -12,7 +12,8 @@ const items = ref([
   {label: 'Menu', to: '/'},
   {label: 'Cart', to: '/cart'},
   {label: 'Orders', to: '/orders'},
-  {label: 'My Reviews', to: '/reviews'}
+  {label: 'My Reviews', to: '/reviews'},
+  {label: 'Messages', to: '/messages'}
 ]);
 
 </script>
