@@ -29,7 +29,7 @@ def add_order(db_session: Session, item: OrderBase, user: User):
                 detail="Non-positive plate quantity."
             )
 
-    order = md.Order(user_id = user.user_id)
+    order = md.Order(user_id = user.user_id, order_status = "Submitted")
     # Add PlateOrder objects.
     for plate in item.plates:
         plate_order = md.PlateOrder(

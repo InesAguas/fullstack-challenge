@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import List, Optional, Any
+from enum import Enum
 
 from pydantic.utils import GetterDict
 from pydantic import BaseModel
@@ -34,9 +35,9 @@ class Plate(PlateBase):
     class Config:
         orm_mode = True
 
-
-class PlateCount(Plate):
+class PlateRanking(Plate):
     order_count: int
+    rating: float
 
     class Config:
         orm_mode = True
@@ -66,9 +67,20 @@ class OrderBase(BaseModel):
     plates: List[PlateOrderBase]
     
 
+class Status(str, Enum):
+    submitted = 'Submitted',
+    approved = 'Approved'
+    rejected = 'Rejected'
+    canceled = 'Canceled'
+    in_preparation = 'In Preparation'
+    in_delivery = 'In Delivery'
+    delivered = 'Delivered'
+
+
 class Order(OrderBase):   
     order_id: int
     order_time: datetime
+    order_status: Status
     plates: List[PlateOrder]
     class Config:
         orm_mode = True

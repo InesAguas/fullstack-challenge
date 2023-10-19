@@ -14,6 +14,8 @@
   -webkit-text-size-adjust: 100%;
 }
 
+
+
 a {
   font-weight: 500;
   color: #646cff;
@@ -65,7 +67,13 @@ button:focus-visible {
 }
 
 .card {
-  padding: 2em;
+  padding: 2em 0;
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 1em 0;
+  }
 }
 
 #app {

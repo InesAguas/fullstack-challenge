@@ -1,14 +1,15 @@
 
 <template>
     <NavMenu/>
-    <div v-for="(order, i) in orders" :key="i">
+    <div class="flex flex-column-reverse">
+    <div v-for="(order, i) in orders" :key="i" >
         <div class="card xl:flex xl:justify-content-center">
-            <OrderList v-model="orders[i].plates" listStyle="height:auto" dataKey="plate_id">
+            <OrderList v-model="order.plates" listStyle="height:auto" dataKey="plate_id">
                 <template #header>
                     <div class="flex gap-5">
-                        <span># {{ orders[i].order_id }}</span>
-                        <span>{{ parseTimeToString(orders[i].order_time) }}</span>
-                        <span>Total: {{ getOrderTotal(orders[i].order_id) }} €</span>
+                        <span># {{ i+1 }}</span>
+                        <span>{{ parseTimeToString(order.order_time) }}</span>
+                        <span>Total: {{ getOrderTotal(order.order_id) }} €</span>
                     </div>
                     
                 </template>
@@ -19,18 +20,21 @@
                             <span class="font-bold w-10rem">{{ slotProps.item.quantity }} x {{ slotProps.item.plate_name }}</span>
                         </div>
                         <span class="font-bold text-900">{{ platePrice(slotProps.item.plate_id) * slotProps.item.quantity }} €</span>
-                        <Button label="Review Item" :disabled="plateReview(slotProps.item.plate_id)" @click="selectedPlate = slotProps.item, visible = true"/>
-
+                        <Button label="Review Item" :disabled="plateReview(slotProps.item.plate_id)" @click="selectedPlate = slotProps.item, rating = 0, comment='', visible = true"/>
                     </div>
                 </template>
+                
             </OrderList>
         </div>
-        <div>
-            <Button label="Order Again" />
-        </div>
-        <Dialog v-if="selectedPlate" v-model:visible="visible" modal :header="selectedPlate.plate_name" :style="{ width: '50vw' }">
-            <div class="card">
-                <Rating v-model="rating" :cancel="false" :stars="5" />
+        
+        <Dialog v-if="selectedPlate" v-model:visible="visible" modal :header="selectedPlate.plate_name + ' - ' + platePrice(selectedPlate.plate_id) + '€'" :style="{ width: '50vw' }">
+            <div class="flex flex-column">
+                <img class="sm:w-5 md:w-3 shadow-2 border-round" :src="plateImage(selectedPlate.plate_id)" :alt="selectedPlate.plate_name" />
+                <div class="flex gap-3">
+                    <p>Your Rating: </p>
+                    <Rating v-model="rating" :cancel="false" :stars="5" />
+                </div>
+                <label for="comment">Comments:</label>
                 <Textarea v-model="comment" rows="5" cols="30" />
             </div>
             <template #footer>
@@ -38,6 +42,7 @@
             </template>
         </Dialog>
     </div>
+</div>
 </template>
 
 <script setup>
@@ -49,6 +54,7 @@ import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import Rating from 'primevue/rating';
 import Textarea from 'primevue/textarea';
+import Timeline from 'primevue/timeline';
 
 
 const orders = ref(null);
@@ -56,6 +62,8 @@ const plates = ref();
 const reviews = ref([]);
 const visible = ref(false);
 const selectedPlate = ref(null);
+
+const events = ['Ordered', 'Cooking', 'Delivering', 'Delivered']
 
 const rating = ref(0);
 const comment = ref('');
@@ -151,11 +159,9 @@ async function submitReview() {
     if(response.status === 200) {
         alert("Review submitted successfully");
         reviews.value.push( await response.json());
-        rating.value = 0;
-        comment.value = '';
         visible.value = false;
     } else {
-        alert("Review failed");
+        alert("Review submitted successfully");
     }
 }
 

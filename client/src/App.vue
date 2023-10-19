@@ -2,7 +2,7 @@
 </script>
 
 <template>
-  <div class="top-0">
+  <div class="w-full">
     <router-view />
   </div>
 </template>

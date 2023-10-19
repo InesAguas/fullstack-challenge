@@ -2,7 +2,7 @@
 <template>
     <NavMenu/>
     <div class="card">
-        <DataTable :value="reviews" tableStyle="min-width: 50rem">
+        <DataTable :value="reviews"   paginator :rows="4" :rowsPerPageOptions="[4, 6, 8, 10]" tableStyle="max-width: 50rem;" >
             <Column header="Plate Name">
                 <template #body="slotProps">
                   {{ plateName(slotProps.data.plate_id) }}
@@ -18,7 +18,11 @@
                     <Rating v-model="slotProps.data.rating" :cancel="false" readonly />
                 </template>
             </Column>
-            <Column field="comment" header="Comment"></Column>
+            <Column  header="Comment" >
+                <template #body="slotProps">
+                    <p class="sm:max-w-10rem md:max-w-20rem" style="word-wrap: break-word">{{ slotProps.data.comment }}</p>
+                </template>
+            </Column>
         </DataTable>
 </div>
 </template>

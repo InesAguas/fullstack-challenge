@@ -2,7 +2,7 @@
 <template>
     <NavMenu/>
     <div class="card">
-    <DataTable :value="cart" tableStyle="min-width: 50rem">
+    <DataTable :value="cart" resizableColumns columnResizeMode="fit"  tableStyle="min-width: 10rem">
         <Column field="plate_name" header="Name"></Column>
         <Column header="Picture">
             <template #body="slotProps">
@@ -10,18 +10,32 @@
             </template>
         </Column>
         <Column field="price" header="Price"></Column>
-        <Column field="quantity" header="Quantity"></Column>
+        <Column header="Quantity">
+            <template #body="slotProps">
+                <InputNumber v-model="slotProps.data.quantity" showButtons buttonLayout="vertical" style="width: 3rem"
+    decrementButtonClassName="p-button-secondary" incrementButtonClassName="p-button-secondary" incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" :min="1" :max="20"/>
+        </template>
+        </Column>
         <Column header="Total">
             <template #body="slotProps">
-                {{slotProps.data.price * slotProps.data.quantity}} €
+                {{(slotProps.data.price * slotProps.data.quantity).toFixed(2)}} €
+            </template>
+        </Column>
+        <Column header="Actions">
+            <template #body="slotProps">
+                <Button icon="pi pi-trash" severity="danger" text rounded outlined raised aria-label="Cancel" @click="cart.splice(slotProps.rowIndex, 1)"/>
             </template>
         </Column>
         <template #footer> 
-            Total: {{total}} €
-            <Button label="Checkout" class="p-button-success" @click="checkoutOrder()" />
+            <div class="flex justify-content-between">
+                <p>Total: {{total}} €</p>
+                <Button label="Checkout"  severity="success" @click="checkoutOrder()" raised size="small" :disabled="total<=0"/>
+            </div>
         </template>
     </DataTable>
+    <Message v-if="success" severity="success" :sticky="false">Order placed successfully!</Message>
 </div>
+
 </template>
 
 <script setup>
@@ -29,18 +43,34 @@ import NavMenu from './NavMenu.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
-import { ref, onMounted, computed } from 'vue';
+import InputNumber from 'primevue/inputnumber';
+import Message from 'primevue/message';
+
+import { ref, onMounted, computed, watch } from 'vue';
 
 const cart = ref([]);
 const total = ref(0);
+const success = ref(false);
 
 console.log(JSON.parse(sessionStorage.getItem("cart")));
 onMounted(async () => {
     cart.value = JSON.parse(sessionStorage.getItem("cart")) || [];
-    cart.value.forEach(item => {
-        total.value += item.price * item.quantity;
-    });
+    calculateTotal();
 });
+
+watch(cart, (newValue, oldValue) => {
+    sessionStorage.setItem("cart", JSON.stringify(newValue));
+    calculateTotal();
+}, {deep: true});
+
+function calculateTotal() {
+    let newTotal = 0;
+    cart.value.forEach(item => {
+        newTotal += item.price * item.quantity;
+    });
+
+    total.value = newTotal.toFixed(2);
+}
 
 async function checkoutOrder() {
 
@@ -62,11 +92,10 @@ async function checkoutOrder() {
     });
     
     if(response.status === 200) {
-    alert("Order placed successfully");
-    sessionStorage.removeItem("cart");
-    cart.value = [];
-    } else {
-        alert("Order failed");
+        success.value = true;
+        sessionStorage.removeItem("cart");
+        cart.value = [];
+        total.value = 0;
     }
 }
 

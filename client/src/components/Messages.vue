@@ -24,7 +24,7 @@
                 <Button icon="pi pi-send" @click="sendMessage()" :disabled="closed"/>
             </div>
         </div>
-        
+        <Message v-if="closed" severity="warn" :sticky="false">Disconnected due to innactivity.</Message>
     </div>
 </template>
 
@@ -34,6 +34,7 @@ import { ref, onMounted, computed } from 'vue';
 import NavMenu from './NavMenu.vue';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
+import Message from 'primevue/message';
 
 const messages = ref([]);
 const message = ref('');
