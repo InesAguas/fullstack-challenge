@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
-from server.schemas import OrderBase, User
+from server.schemas import OrderBase, User, StatusUpdate
 
 import server.models as md
 
@@ -44,3 +44,13 @@ def add_order(db_session: Session, item: OrderBase, user: User):
     db_session.refresh(order)
 
     return order
+
+
+def update_order_status(db_session: Session, item: StatusUpdate, user:User):
+    status_transitions = {
+        "Submitted": ["Approved", "Rejected", "Canceled"],
+        "Approved": ["In Preparation"],
+        "In Preparation": ["In Delivery"],
+        "In Delivery": ["Delivered"],
+    }
+    return 0

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from server.schemas import OrderBase, Order, User
+from server.schemas import OrderBase, Order, User, StatusUpdate
 from server.crud.orders import get_orders, add_order
 from server.utils import get_db
 from server.dependencies.security import get_current_user
@@ -28,3 +28,16 @@ async def add_new_order(
 
     """
     return add_order(db_session, item, user)
+
+
+@router.put("/status/{order_id}", response_model=Order)
+async def update_order_status(
+    order_id: int,
+    item: StatusUpdate,
+    db_session: Session = Depends(get_db),
+    user: User = Depends(get_current_user)
+):
+    """Update Order
+
+    """
+    return 0

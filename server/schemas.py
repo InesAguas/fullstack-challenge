@@ -77,6 +77,10 @@ class Status(str, Enum):
     delivered = 'Delivered'
 
 
+class StatusUpdate(BaseModel):
+    order_status: Status
+
+
 class Order(OrderBase):   
     order_id: int
     order_time: datetime
