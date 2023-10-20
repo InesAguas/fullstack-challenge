@@ -68,7 +68,7 @@ class OrderBase(BaseModel):
     
 
 class Status(str, Enum):
-    submitted = 'Submitted',
+    submitted = 'Submitted'
     approved = 'Approved'
     rejected = 'Rejected'
     canceled = 'Canceled'

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from server.schemas import OrderBase, Order, User, StatusUpdate
-from server.crud.orders import get_orders, add_order
+from server.crud.orders import get_orders, add_order, update_order
 from server.utils import get_db
 from server.dependencies.security import get_current_user
 from sqlalchemy.orm import Session
@@ -40,4 +40,4 @@ async def update_order_status(
     """Update Order
 
     """
-    return 0
+    return update_order(db_session, order_id, item, user)

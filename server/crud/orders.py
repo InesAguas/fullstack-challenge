@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
-from server.schemas import OrderBase, User, StatusUpdate
+from server.schemas import OrderBase, User, StatusUpdate, Order
 
 import server.models as md
 
@@ -46,11 +46,34 @@ def add_order(db_session: Session, item: OrderBase, user: User):
     return order
 
 
-def update_order_status(db_session: Session, item: StatusUpdate, user:User):
+def update_order(db_session: Session, order_id: int, item: StatusUpdate, user: User):
     status_transitions = {
         "Submitted": ["Approved", "Rejected", "Canceled"],
-        "Approved": ["In Preparation"],
+        "Approved": ["In Preparation", "Canceled"],
         "In Preparation": ["In Delivery"],
         "In Delivery": ["Delivered"],
     }
-    return 0
+
+    order = db_session.query(md.Order).filter(md.Order.order_id == order_id).first()
+    if not order:
+        raise HTTPException(
+            status_code=404,
+            detail="Order not found."
+        )
+    
+    if order.user_id != user.user_id:
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized."
+        )
+    
+    if item.order_status not in status_transitions[order.order_status]:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid status transition."
+        )
+    
+    order.order_status = item.order_status
+    db_session.commit()
+    db_session.refresh(order)
+    return order
