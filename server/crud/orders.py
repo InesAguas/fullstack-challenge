@@ -6,7 +6,7 @@ import server.models as md
 
 
 def get_orders(db_session: Session, user: User):
-    return user.orders
+    return db_session.query(md.Order).filter(md.Order.user_id == user.user_id).order_by(md.Order.order_time.desc()).all()
 
 
 def add_order(db_session: Session, item: OrderBase, user: User):

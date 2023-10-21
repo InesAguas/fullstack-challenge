@@ -2,7 +2,7 @@
 <template>
     <NavMenu/>
     <div class="card">
-    <DataTable :value="cart" resizableColumns columnResizeMode="fit"  tableStyle="min-width: 10rem">
+    <DataTable :value="cart"  tableStyle="min-width: 10rem">
         <Column field="plate_name" header="Name"></Column>
         <Column header="Picture">
             <template #body="slotProps">

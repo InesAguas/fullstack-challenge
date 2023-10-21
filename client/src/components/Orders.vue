@@ -1,17 +1,68 @@
 
 <template>
     <NavMenu/>
-    <div class="flex flex-column-reverse">
-    <div v-for="(order, i) in orders" :key="i" >
-        <div class="card xl:flex xl:justify-content-center">
-            <OrderList v-model="order.plates" listStyle="height:auto" dataKey="plate_id">
+    
+    <div class="card">
+
+    <DataTable :value="orders"  paginator :rows="5" :rowsPerPageOptions="[5, 10, 20]"  dataKey="order_id" v-model:expandedRows="expandedRows" tableStyle="min-width: 60rem">
+        <Column expander style="width: 5rem" />
+        <Column header="Order Number">
+        <template #body="slotProps">
+           #{{ slotProps.data.order_id  }}
+        </template>
+        </Column>
+        <Column header="Date Ordered">
+            <template #body="slotProps">
+                {{ parseTimeToString(slotProps.data.order_time) }}
+            </template>
+        </Column>
+        <Column header="Status">
+            <template #body="slotProps">
+                <Tag :severity="tagColor(slotProps.data.order_status)" :value="slotProps.data.order_status"></Tag>
+            </template>
+        </Column>
+        <Column header="Update Order Status" >
+            <template #body="slotProps" >
+
+                <div class="flex flex-wrap justify-content-between" v-if="slotProps.data.order_status != 'Rejected' && slotProps.data.order_status != 'Canceled' && slotProps.data.order_status != 'Delivered'" >
+                    <div class="flex flex-column gap-2 align-self-center" >
+                        <div class="flex align-items-center"  v-if="slotProps.data.order_status === 'Submitted'" >
+                            <RadioButton v-model="slotProps.data.next_order_state" inputId="1" name="status" value="Approved"  />
+                            <label for="1" class="ml-2 text-sm">Approved</label>
+                        </div>
+                        <div class="flex align-items-center"  v-if="slotProps.data.order_status === 'Submitted'" >
+                            <RadioButton v-model="slotProps.data.next_order_state" inputId="2" name="status" value="Rejected" size="small"/>
+                            <label for="2" class="ml-2 text-sm">Rejected</label>
+                        </div>
+                        <div class="flex align-items-center"  v-if="slotProps.data.order_status === 'Approved'" >
+                            <RadioButton v-model="slotProps.data.next_order_state"  disabled inputId="3" name="status" value="In Preparation" size="small"/>
+                            <label for="2" class="ml-2 text-sm">In Preparation</label>
+                        </div>
+                        <div class="flex align-items-center"  v-if="slotProps.data.order_status === 'In Preparation'" >
+                            <RadioButton v-model="slotProps.data.next_order_state"  disabled inputId="4" name="status" value="In Delivery" size="small"/>
+                            <label for="2" class="ml-2 text-sm">In Delivery</label>
+                        </div>
+                        <div class="flex align-items-center"  v-if="slotProps.data.order_status === 'In Delivery'" >
+                            <RadioButton v-model="slotProps.data.next_order_state"  disabled inputId="5" name="status" value="Delivered" size="small"/>
+                            <label for="2" class="ml-2 text-sm">Delivered</label>
+                        </div>
+                    </div>
+                    <Button label="Update Status" class="p-button-success p-1 mb-2 text-xs" size="small" title="Update Order Status" @click="updateOrderStatus(slotProps.data.order_id)"/>
+                </div>
+                <div class="flex justify-content-end" >
+                    <Button v-if="canOrderBeCancelled(slotProps.data.order_status)" @click="slotProps.data.next_order_state = 'Canceled', updateOrderStatus(slotProps.data.order_id)" label="Cancel Order" class="p-button-danger text-xs p-1 align-self-end " size="small" title="Cancel Order"/>
+                </div>
+                
+            </template>
+        </Column>
+
+        <template #expansion="slotProps">
+            <div class="mx-6 flex flex-column align-content-center" >
+            <OrderList v-model="slotProps.data.plates" listStyle="height:auto" dataKey="plate_id">
                 <template #header>
                     <div class="flex gap-5">
-                        <span># {{ i+1 }}</span>
-                        <span>{{ parseTimeToString(order.order_time) }}</span>
-                        <span>Total: {{ getOrderTotal(order.order_id) }} €</span>
+                        <span>Total: {{ getOrderTotal(slotProps.data.order_id) }} €</span>
                     </div>
-                    
                 </template>
                 <template #item="slotProps">
                     <div class="flex flex-wrap p-2 align-items-center gap-3">
@@ -26,23 +77,23 @@
                 
             </OrderList>
         </div>
-        
-        <Dialog v-if="selectedPlate" v-model:visible="visible" modal :header="selectedPlate.plate_name + ' - ' + platePrice(selectedPlate.plate_id) + '€'" :style="{ width: '50vw' }">
-            <div class="flex flex-column">
-                <img class="sm:w-5 md:w-3 shadow-2 border-round" :src="plateImage(selectedPlate.plate_id)" :alt="selectedPlate.plate_name" />
-                <div class="flex gap-3">
-                    <p>Your Rating: </p>
-                    <Rating v-model="rating" :cancel="false" :stars="5" />
-                </div>
-                <label for="comment">Comments:</label>
-                <Textarea v-model="comment" rows="5" cols="30" />
-            </div>
-            <template #footer>
-                <Button label="Submit" icon="pi pi-check" @click="submitReview()"/>
-            </template>
-        </Dialog>
-    </div>
+        </template>
+    </DataTable>
 </div>
+    <Dialog v-if="selectedPlate" v-model:visible="visible" modal :header="selectedPlate.plate_name + ' - ' + platePrice(selectedPlate.plate_id) + '€'" :style="{ width: '50vw' }">
+        <div class="flex flex-column">
+            <img class="sm:w-5 md:w-3 shadow-2 border-round" :src="plateImage(selectedPlate.plate_id)" :alt="selectedPlate.plate_name" />
+            <div class="flex gap-3">
+                <p>Your Rating: </p>
+                <Rating v-model="rating" :cancel="false" :stars="5" />
+            </div>
+            <label for="comment">Comments:</label>
+            <Textarea v-model="comment" rows="5" cols="30" />
+        </div>
+        <template #footer>
+            <Button label="Submit" icon="pi pi-check" @click="submitReview()"/>
+        </template>
+    </Dialog>
 </template>
 
 <script setup>
@@ -54,7 +105,10 @@ import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import Rating from 'primevue/rating';
 import Textarea from 'primevue/textarea';
-import Timeline from 'primevue/timeline';
+import Tag from 'primevue/tag';
+import Column from 'primevue/column';
+import DataTable from 'primevue/datatable'; 
+import RadioButton from 'primevue/radiobutton';
 
 
 const orders = ref(null);
@@ -62,11 +116,12 @@ const plates = ref();
 const reviews = ref([]);
 const visible = ref(false);
 const selectedPlate = ref(null);
+const expandedRows = ref([]);
 
-const events = ['Ordered', 'Cooking', 'Delivering', 'Delivered']
 
 const rating = ref(0);
 const comment = ref('');
+
 
 onMounted(async () => {
     // fetch plates from server
@@ -88,6 +143,7 @@ onMounted(async () => {
     });
     const data_orders = await response_orders.json();
     orders.value = data_orders;
+    console.log(orders.value)
 
     //fetch user reviews
     const URL_REVIEWS = "https://localhost:8443/api/reviews"
@@ -99,9 +155,29 @@ onMounted(async () => {
 
     const data_reviews = await response_reviews.json();
     reviews.value = data_reviews;
+
+    defaultNextOrderState();
     
 });
 
+
+function defaultNextOrderState() {
+    orders.value.forEach(order => {
+        switch(order.order_status) {
+            case "Submitted":
+                order.next_order_state = "Approved";
+                break;
+            case "Approved":
+                order.next_order_state = "In Preparation";
+                break;
+            case "In Preparation":
+                order.next_order_state = "In Delivery";
+                break;
+            default:
+                order.next_order_state = "Delivered";
+        }
+    });
+}
 
 function platePrice(itemId) {
     return plates.value.find(plate => plate.plate_id === itemId).price
@@ -129,6 +205,20 @@ function getOrderTotal(orderId) {
 
 function plateReview(itemId) {
     return reviews.value.find(review => review.plate_id === itemId);
+}
+
+function canOrderBeCancelled(status) {
+    return status === "Submitted" || status === "Approved";
+}
+
+function tagColor(status) {
+    if(status === "Delivered") {
+        return "success";
+    } else if(status === "Canceled" || status === "Rejected") {
+        return "danger";
+    } else {
+        return "warning";
+    }
 }
 
 async function submitReview() {
@@ -163,6 +253,33 @@ async function submitReview() {
     } else {
         alert("Review submitted successfully");
     }
+
+   
 }
+
+async function updateOrderStatus(orderId) {
+    const URL = "https://localhost:8443/api/orders/status/" + orderId
+    let index = orders.value.findIndex(order => order.order_id === orderId);
+    console.log(index)
+    const response = await fetch(URL,{
+        method: "PUT",
+        body: JSON.stringify({
+            order_status: orders.value[index].next_order_state
+        }),
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + sessionStorage.getItem("token")
+        }
+    });
+
+    if(response.status === 200) {
+        alert("Order status updated successfully");
+        orders.value[index].order_status = orders.value[index].next_order_state;
+        defaultNextOrderState();
+    } else {
+        alert("Order status update failed");
+    }
+
+    }
 
 </script>
