@@ -3,7 +3,7 @@
 --
 
 -- Dumped from database version 15.1 (Debian 15.1-1.pgdg110+1)
--- Dumped by pg_dump version 15.2
+-- Dumped by pg_dump version 15.1
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -27,7 +27,9 @@ SET default_table_access_method = heap;
 CREATE TABLE public."order" (
     order_id integer NOT NULL,
     order_time timestamp with time zone NOT NULL,
-    "_Order__finish_time" timestamp with time zone NOT NULL
+    "_Order__finish_time" timestamp with time zone NOT NULL,
+    user_id bigint,
+    order_status text
 );
 
 
@@ -105,6 +107,78 @@ ALTER SEQUENCE public.plate_plate_id_seq OWNED BY public.plate.plate_id;
 
 
 --
+-- Name: review; Type: TABLE; Schema: public; Owner: tech_user
+--
+
+CREATE TABLE public.review (
+    review_id integer NOT NULL,
+    user_id integer NOT NULL,
+    plate_id integer NOT NULL,
+    comment text,
+    rating integer NOT NULL
+);
+
+
+ALTER TABLE public.review OWNER TO tech_user;
+
+--
+-- Name: review_review_id_seq; Type: SEQUENCE; Schema: public; Owner: tech_user
+--
+
+CREATE SEQUENCE public.review_review_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.review_review_id_seq OWNER TO tech_user;
+
+--
+-- Name: review_review_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tech_user
+--
+
+ALTER SEQUENCE public.review_review_id_seq OWNED BY public.review.review_id;
+
+
+--
+-- Name: user; Type: TABLE; Schema: public; Owner: tech_user
+--
+
+CREATE TABLE public."user" (
+    user_id integer NOT NULL,
+    username text NOT NULL,
+    hashed_password text NOT NULL
+);
+
+
+ALTER TABLE public."user" OWNER TO tech_user;
+
+--
+-- Name: user_user_id_seq; Type: SEQUENCE; Schema: public; Owner: tech_user
+--
+
+CREATE SEQUENCE public.user_user_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.user_user_id_seq OWNER TO tech_user;
+
+--
+-- Name: user_user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tech_user
+--
+
+ALTER SEQUENCE public.user_user_id_seq OWNED BY public."user".user_id;
+
+
+--
 -- Name: order order_id; Type: DEFAULT; Schema: public; Owner: tech_user
 --
 
@@ -119,14 +193,24 @@ ALTER TABLE ONLY public.plate ALTER COLUMN plate_id SET DEFAULT nextval('public.
 
 
 --
+-- Name: review review_id; Type: DEFAULT; Schema: public; Owner: tech_user
+--
+
+ALTER TABLE ONLY public.review ALTER COLUMN review_id SET DEFAULT nextval('public.review_review_id_seq'::regclass);
+
+
+--
+-- Name: user user_id; Type: DEFAULT; Schema: public; Owner: tech_user
+--
+
+ALTER TABLE ONLY public."user" ALTER COLUMN user_id SET DEFAULT nextval('public.user_user_id_seq'::regclass);
+
+
+--
 -- Data for Name: order; Type: TABLE DATA; Schema: public; Owner: tech_user
 --
 
-COPY public."order" (order_id, order_time, "_Order__finish_time") FROM stdin;
-1	2023-05-02 23:25:48.168407+00	2023-05-02 23:37:22.168469+00
-2	2023-05-02 23:31:14.594509+00	2023-05-02 23:35:39.594689+00
-3	2023-05-02 23:31:35.101242+00	2023-05-02 23:35:43.101272+00
-4	2023-05-02 23:31:46.821307+00	2023-05-02 23:39:43.821336+00
+COPY public."order" (order_id, order_time, "_Order__finish_time", user_id, order_status) FROM stdin;
 \.
 
 
@@ -151,16 +235,22 @@ COPY public.plate (plate_id, plate_name, price, picture) FROM stdin;
 --
 
 COPY public.plate_order (plate_id, order_id, quantity) FROM stdin;
-1	1	3
-3	1	1
-1	2	1
-2	2	1
-3	2	1
-4	2	1
-3	3	1
-4	3	1
-5	3	1
-6	4	1
+\.
+
+
+--
+-- Data for Name: review; Type: TABLE DATA; Schema: public; Owner: tech_user
+--
+
+COPY public.review (review_id, user_id, plate_id, comment, rating) FROM stdin;
+\.
+
+
+--
+-- Data for Name: user; Type: TABLE DATA; Schema: public; Owner: tech_user
+--
+
+COPY public."user" (user_id, username, hashed_password) FROM stdin;
 \.
 
 
@@ -168,7 +258,7 @@ COPY public.plate_order (plate_id, order_id, quantity) FROM stdin;
 -- Name: order_order_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tech_user
 --
 
-SELECT pg_catalog.setval('public.order_order_id_seq', 4, true);
+SELECT pg_catalog.setval('public.order_order_id_seq', 22, true);
 
 
 --
@@ -176,6 +266,20 @@ SELECT pg_catalog.setval('public.order_order_id_seq', 4, true);
 --
 
 SELECT pg_catalog.setval('public.plate_plate_id_seq', 8, true);
+
+
+--
+-- Name: review_review_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tech_user
+--
+
+SELECT pg_catalog.setval('public.review_review_id_seq', 17, true);
+
+
+--
+-- Name: user_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tech_user
+--
+
+SELECT pg_catalog.setval('public.user_user_id_seq', 11, true);
 
 
 --
@@ -203,6 +307,30 @@ ALTER TABLE ONLY public.plate
 
 
 --
+-- Name: review review_pkey; Type: CONSTRAINT; Schema: public; Owner: tech_user
+--
+
+ALTER TABLE ONLY public.review
+    ADD CONSTRAINT review_pkey PRIMARY KEY (review_id);
+
+
+--
+-- Name: user user_pkey; Type: CONSTRAINT; Schema: public; Owner: tech_user
+--
+
+ALTER TABLE ONLY public."user"
+    ADD CONSTRAINT user_pkey PRIMARY KEY (user_id);
+
+
+--
+-- Name: order order_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: tech_user
+--
+
+ALTER TABLE ONLY public."order"
+    ADD CONSTRAINT order_user_id_fkey FOREIGN KEY (user_id) REFERENCES public."user"(user_id) NOT VALID;
+
+
+--
 -- Name: plate_order plate_order_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: tech_user
 --
 
@@ -216,6 +344,22 @@ ALTER TABLE ONLY public.plate_order
 
 ALTER TABLE ONLY public.plate_order
     ADD CONSTRAINT plate_order_plate_id_fkey FOREIGN KEY (plate_id) REFERENCES public.plate(plate_id);
+
+
+--
+-- Name: review review_plate_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: tech_user
+--
+
+ALTER TABLE ONLY public.review
+    ADD CONSTRAINT review_plate_id_fkey FOREIGN KEY (plate_id) REFERENCES public.plate(plate_id) NOT VALID;
+
+
+--
+-- Name: review review_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: tech_user
+--
+
+ALTER TABLE ONLY public.review
+    ADD CONSTRAINT review_user_id_fkey FOREIGN KEY (user_id) REFERENCES public."user"(user_id) NOT VALID;
 
 
 --

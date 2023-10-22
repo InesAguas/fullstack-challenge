@@ -80,6 +80,7 @@
         </div>
         
     </Dialog>
+    <Toast position="bottom-right"/>
 </template>
 
 <script setup>
@@ -93,13 +94,16 @@ import NavMenu from './NavMenu.vue';
 import Dialog from 'primevue/dialog';
 import Rating from 'primevue/rating';
 import Tag from 'primevue/tag';
+import Toast from 'primevue/toast';
+
+import { useToast } from "primevue/usetoast";
+const toast = useToast();
 
 const plates = ref();
 const layout = ref('grid');
 const selectedPlate = ref();
 const visible = ref(false);
 const selectedPlateReviews = ref([]);
-const rating = ref(0);
 
 onMounted(async () => {
     // fetch data from server
@@ -119,7 +123,7 @@ function addToCart(item) {
         cart[index].quantity++;
     }
     sessionStorage.setItem("cart", JSON.stringify(cart));
-    console.log(cart)
+    displayToast("success", cart[index].plate_name + " added to cart!")
 }
 
 
@@ -129,5 +133,10 @@ async function getItemReviews() {
     const data = await response.json();
     selectedPlateReviews.value = data;
 }
+
+
+const displayToast = (severity, message) => {
+    toast.add({ severity: severity, summary: 'Info', detail: message, life: 3000 });
+};
 
 </script>

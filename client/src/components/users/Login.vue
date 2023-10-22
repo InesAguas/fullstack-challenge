@@ -67,7 +67,7 @@ async function login() {
 
     } else {
         let data = await response.json();
-        message.value = data.details;
+        message.value = data.detail;
         failed.value = true;
     }
 

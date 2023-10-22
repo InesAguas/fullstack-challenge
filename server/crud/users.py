@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 import hashlib
+import re
 
 from server.schemas import User, UserCredentials, UserBase, Token
 
@@ -15,8 +16,17 @@ def hash_password(password: str):
 def add_user(db_session: Session, item: UserCredentials):
     to_fetch = db_session.query(md.User).filter(md.User.username == item.username)
 
+    if not item.username or not item.password:
+        raise HTTPException(status_code=409, detail="Username and password must be provided.")
+    
+    if len(item.username) < 4 or len(item.username) > 20:
+        raise HTTPException(status_code=409, detail="Username must be between 4 and 20 characters long.")
+    
     if to_fetch.first():
         raise HTTPException(status_code=409, detail="Username already in use.")
+    
+    if not re.match("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$", item.password):
+        raise HTTPException(status_code=409, detail="Password must contain at least 8 characters, 1 number, 1 uppercase letter and 1 lowercase letter.")
 
     item = md.User(username=item.username, hashed_password=hash_password(item.password))
 

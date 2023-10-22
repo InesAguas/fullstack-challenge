@@ -9,7 +9,11 @@
                 <img :src="slotProps.data.picture" :alt="slotProps.data.picture" class="w-6rem shadow-2 border-round" />
             </template>
         </Column>
-        <Column field="price" header="Price"></Column>
+        <Column header="Price">
+            <template #body="slotProps">
+                {{slotProps.data.price}} €
+            </template>
+        </Column>
         <Column header="Quantity">
             <template #body="slotProps">
                 <InputNumber v-model="slotProps.data.quantity" showButtons buttonLayout="vertical" style="width: 3rem"
@@ -23,7 +27,7 @@
         </Column>
         <Column header="Actions">
             <template #body="slotProps">
-                <Button icon="pi pi-trash" severity="danger" text rounded outlined raised aria-label="Cancel" @click="cart.splice(slotProps.rowIndex, 1)"/>
+                <Button icon="pi pi-trash" severity="danger" text rounded outlined raised aria-label="Cancel" @click="removeItem(slotProps.data.plate_id)"/>
             </template>
         </Column>
         <template #footer> 
@@ -35,6 +39,7 @@
     </DataTable>
     <Message v-if="success" severity="success" :sticky="false">Order placed successfully!</Message>
 </div>
+<Toast position="bottom-right"/>
 
 </template>
 
@@ -46,13 +51,18 @@ import Button from 'primevue/button';
 import InputNumber from 'primevue/inputnumber';
 import Message from 'primevue/message';
 
+import Toast from 'primevue/toast';
+
+import { useToast } from "primevue/usetoast";
+const toast = useToast();
+
 import { ref, onMounted, computed, watch } from 'vue';
 
 const cart = ref([]);
 const total = ref(0);
 const success = ref(false);
 
-console.log(JSON.parse(sessionStorage.getItem("cart")));
+
 onMounted(async () => {
     cart.value = JSON.parse(sessionStorage.getItem("cart")) || [];
     calculateTotal();
@@ -73,9 +83,10 @@ function calculateTotal() {
 }
 
 async function checkoutOrder() {
+    
 
     if(cart.value.length === 0) {
-        alert("Cart is empty");
+        displayToast("error", "Cart is empty!");
         return;
     }
   
@@ -97,6 +108,16 @@ async function checkoutOrder() {
         cart.value = [];
         total.value = 0;
     }
+}
+
+const displayToast = (severity, message) => {
+    toast.add({ severity: severity, summary: 'Info', detail: message, life: 3000 });
+};
+
+function removeItem(plateId) {
+    const index = cart.value.findIndex(item => item.plate_id === plateId);
+    cart.value.splice(index, 1);
+    displayToast("success", "Item removed from cart!");
 }
 
 </script>

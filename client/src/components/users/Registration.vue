@@ -8,7 +8,18 @@
         </div>
         <div class="flex flex-column mt-2">
             <label for="password" class="align-self-start">Password</label>
-            <Password v-model="password"  toggleMask />  
+            <Password v-model="password"  toggleMask >  
+                <template #footer>
+                    <Divider />
+                    <p class="mt-2">Must have:</p>
+                    <ul class="pl-2 ml-2 mt-0" style="line-height: 1.5">
+                        <li>At least one lowercase</li>
+                        <li>At least one uppercase</li>
+                        <li>At least one number</li>
+                        <li>Minimum 8 characters</li>
+                    </ul>
+                </template>
+            </Password>
         </div>
         <p class="text-sm">Already have an account? <router-link to="/login">Sign in</router-link></p>
         <Button label="Sign up" @click="signUp()" class="mt-2 w-9" />
