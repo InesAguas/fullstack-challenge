@@ -30,7 +30,7 @@ async def add_new_review(
     db_session: Session = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
-    """Find order by ID.
+    """Add new review.
 
     """
     return add_review(db_session, item, user)

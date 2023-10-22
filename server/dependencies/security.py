@@ -13,11 +13,15 @@ SECRET_KEY = "your_secret_key"
 auth = HTTPBearer()
 
 def generate_token(user: User):
+   #generates token by hashing the username and the secret key
    signature = hashlib.sha256((user.username + SECRET_KEY).encode()).hexdigest()
+   #the token includes the user id and the signature
    return Token(token=f"{user.user_id}:{signature}")
 
 
 async def get_current_user(db_session=Depends(get_db), token: str = Depends(auth)):
+    """Checks if the token is valid and returns the user.
+    """
     token = token.credentials
     if not token:
         raise HTTPException(status_code=401, detail="Wrong credentials.")

@@ -52,7 +52,7 @@ async function login() {
     const response = await fetch(URL, {
         method: "POST",
         body: JSON.stringify({
-            username: username.value,
+            username: username.value.toLowerCase(),
             password: password.value
         }),
         headers: {

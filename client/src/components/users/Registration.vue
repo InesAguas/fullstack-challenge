@@ -37,6 +37,8 @@ import Password from 'primevue/password';
 import Button from 'primevue/button';
 import Message from 'primevue/message';
 
+import Divider from 'primevue/divider';
+
 const username = ref('');
 const password = ref('');
 
@@ -48,18 +50,14 @@ const router = useRouter();
 async function signUp() {
 
     if(username.value === ''){
-        console.log("Username cannot be empty", failed.value)
         message.value = "Username cannot be empty";
         failed.value = true;
-        console.log("Username cannot be empty", failed.value)
         return;
     }
 
     if(password.value === '') {
-        console.log("Password cannot be empty", failed.value)
         message.value = "Password cannot be empty";
         failed.value = true;
-        console.log("Password cannot be empty", failed.value)
         return;
     }
 
@@ -67,7 +65,7 @@ async function signUp() {
     const response = await fetch(URL, {
         method: "POST",
         body: JSON.stringify({
-            username: username.value,
+            username: username.value.toLowerCase(),
             password: password.value
         }),
         headers: {

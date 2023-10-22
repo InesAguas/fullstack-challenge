@@ -19,7 +19,9 @@ async def search_plates(db_session: Session = Depends(get_db)):
 
 @router.get("/ranking", response_model=List[PlateRanking])
 async def search_plates_ranking(db_session: Session = Depends(get_db)):
-    """Find the ranked order of plates"""
+    """Find the ranked order of plates. The ranking is based on the number of orders and the average rating.
+    
+    """
     return get_plates_ranking(db_session)
 
 
@@ -28,7 +30,7 @@ async def post_new_plate(
     item: PlateBase,
     db_session: Session = Depends(get_db),
 ):
-    """Find order by ID.
+    """Add new plate.
 
     """
     return add_plate(db_session, item)

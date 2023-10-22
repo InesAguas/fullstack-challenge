@@ -3,7 +3,6 @@
     <NavMenu />
 
     <div class="card">
-        <Toast />
         <DataTable :value="orders" paginator :rows="5" :rowsPerPageOptions="[5, 10, 20]" dataKey="order_id"
             v-model:expandedRows="expandedRows" tableStyle="min-width: 60rem">
             <Column expander style="width: 5rem" />
@@ -109,10 +108,13 @@
             <label for="comment">Comments:</label>
             <Textarea v-model="comment" rows="5" cols="30" />
         </div>
+        <Message v-if="failed" severity="error" >{{message}}</Message>
         <template #footer>
             <Button label="Submit" icon="pi pi-check" @click="submitReview()" />
         </template>
     </Dialog>
+
+    <Toast position="bottom-left"/>
 </template>
 
 <script setup>
@@ -129,6 +131,7 @@ import Column from 'primevue/column';
 import DataTable from 'primevue/datatable';
 import RadioButton from 'primevue/radiobutton';
 import Toast from 'primevue/toast';
+import Message from 'primevue/message';
 
 import { useToast } from "primevue/usetoast";
 const toast = useToast();
@@ -144,6 +147,9 @@ const expandedRows = ref([]);
 
 const rating = ref(0);
 const comment = ref('');
+
+const failed = ref(false);
+const message = ref('');
 
 
 onMounted(async () => {
@@ -166,7 +172,6 @@ onMounted(async () => {
     });
     const data_orders = await response_orders.json();
     orders.value = data_orders;
-    console.log(orders.value)
 
     //fetch user reviews
     const URL_REVIEWS = "https://localhost:8443/api/reviews"
@@ -246,7 +251,8 @@ function tagColor(status) {
 
 async function submitReview() {
     if (rating.value === 0) {
-        displayToast('warning', "Please select a rating");
+        message.value = "Please select a rating";
+        failed.value = true;
         return;
     }
 
@@ -266,11 +272,12 @@ async function submitReview() {
 
 
     if (response.status === 200) {
-        displayToast('success', "Review submitted successfully");
         reviews.value.push(await response.json());
         visible.value = false;
+        displayToast('success', "Review submitted successfully");
     } else {
-        displayToast('error', "Review submission failed");
+       message.value = "Review submission failed";
+       failed.value = true;
     }
 
 
@@ -279,7 +286,6 @@ async function submitReview() {
 async function updateOrderStatus(orderId) {
     const URL = "https://localhost:8443/api/orders/status/" + orderId
     let index = orders.value.findIndex(order => order.order_id === orderId);
-    console.log(index)
     const response = await fetch(URL, {
         method: "PUT",
         body: JSON.stringify({

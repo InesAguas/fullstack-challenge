@@ -255,34 +255,6 @@ COPY public."user" (user_id, username, hashed_password) FROM stdin;
 
 
 --
--- Name: order_order_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tech_user
---
-
-SELECT pg_catalog.setval('public.order_order_id_seq', 22, true);
-
-
---
--- Name: plate_plate_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tech_user
---
-
-SELECT pg_catalog.setval('public.plate_plate_id_seq', 8, true);
-
-
---
--- Name: review_review_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tech_user
---
-
-SELECT pg_catalog.setval('public.review_review_id_seq', 17, true);
-
-
---
--- Name: user_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tech_user
---
-
-SELECT pg_catalog.setval('public.user_user_id_seq', 11, true);
-
-
---
 -- Name: order order_pkey; Type: CONSTRAINT; Schema: public; Owner: tech_user
 --
 

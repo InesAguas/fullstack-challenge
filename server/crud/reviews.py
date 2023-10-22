@@ -27,7 +27,14 @@ def add_review(db_session: Session, item: ReviewBase, user: User):
     #Check if user has already reviewed the plate
     review = db_session.query(md.Review).filter(md.Review.plate_id == item.plate_id, md.Review.user_id == user.user_id).first()
     if review:
-        raise HTTPException(status_code=409, detail="User has already reviewed this plate.")
+        raise HTTPException(status_code=400, detail="User has already reviewed this plate.")
+    
+    #Check if rating and comment are valid
+    if item.rating < 1 or item.rating > 5:
+        raise HTTPException(status_code=400, detail="Rating must be between 1 and 5.")
+    
+    if len(item.comment) > 200:
+        raise HTTPException(status_code=400, detail="Comment must be less than 200 characters long.")
     
     item = md.Review(user_id=user.user_id, plate_id=plate.plate_id, comment=item.comment, rating=item.rating)
 

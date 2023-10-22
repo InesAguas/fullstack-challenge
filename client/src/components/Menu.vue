@@ -80,7 +80,7 @@
         </div>
         
     </Dialog>
-    <Toast position="bottom-right"/>
+    <Toast position="bottom-left"/>
 </template>
 
 <script setup>
@@ -123,7 +123,7 @@ function addToCart(item) {
         cart[index].quantity++;
     }
     sessionStorage.setItem("cart", JSON.stringify(cart));
-    displayToast("success", cart[index].plate_name + " added to cart!")
+    displayToast("success", item.plate_name + " added to cart!")
 }
 
 

@@ -12,7 +12,7 @@ router = APIRouter()
 
 @router.get("", response_model=List[Order])
 async def search_orders(db_session: Session = Depends(get_db), user: User = Depends(get_current_user)):
-    """Find order by ID.
+    """Get all orders for the user.
 
     """
     return get_orders(db_session, user)
@@ -24,7 +24,7 @@ async def add_new_order(
     db_session: Session = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
-    """Find order by ID.
+    """Add new order.
 
     """
     return add_order(db_session, item, user)
@@ -37,7 +37,7 @@ async def update_order_status(
     db_session: Session = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
-    """Update Order
+    """Update Order Status.
 
     """
     return update_order(db_session, order_id, item, user)

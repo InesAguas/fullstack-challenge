@@ -10,6 +10,7 @@ def get_plates(db_session: Session):
 
 
 def get_plates_ranking(db_session: Session):
+    #added order by rating
     result = db_session.query(
         md.Plate,
         func.count(md.PlateOrder.plate_id).label("order_count"),
@@ -34,7 +35,7 @@ def add_plate(db_session: Session, item: PlateBase):
     to_fetch = db_session.query(md.Plate).filter(md.Plate.plate_name == item.plate_name)
 
     if to_fetch.first():
-        raise HTTPException(status_code=409, detail="Resource already exists.")
+        raise HTTPException(status_code=400, detail="Resource already exists.")
 
     item = md.Plate(plate_name=item.plate_name, price=item.price, picture=item.picture)
 

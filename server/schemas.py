@@ -66,7 +66,7 @@ class PlateOrder(PlateOrderBase):
 class OrderBase(BaseModel):
     plates: List[PlateOrderBase]
     
-
+#status is as enum because it can only be these values
 class Status(str, Enum):
     submitted = 'Submitted'
     approved = 'Approved'

@@ -39,7 +39,7 @@
     </DataTable>
     <Message v-if="success" severity="success" :sticky="false">Order placed successfully!</Message>
 </div>
-<Toast position="bottom-right"/>
+<Toast position="bottom-left"/>
 
 </template>
 
