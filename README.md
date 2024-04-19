@@ -1,10 +1,6 @@
 ### Recruitment Challenge
 
-The aim of this challenge is to add features to an existing simplified meal ordering platform, which, in the current state, looks like shown in screenshots below.
-
-![image](https://github.com/kevin-kessler/origin-full-stack-restaurant-challenge/assets/13378028/40bf6fd0-9a43-4ea8-842e-9b5007834c86)
-
-![image](https://github.com/kevin-kessler/origin-full-stack-restaurant-challenge/assets/13378028/abd6ecc6-ab03-4845-86e0-9b4aa0722b33)
+The aim of this challenge is to add features to an existing simplified meal ordering platform.
 
 Please use the code provided in this repository as the base for your solution and extend it by the requested features mentioned below.
 
